@@ -1,45 +1,183 @@
 <!DOCTYPE html>
-<html lang="">
+<html lang="en">
 <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Add Travel History</title>
+    <link
+            rel="stylesheet"
+            href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
     <style>
+        /* Background with travel-related image and overlay */
         body {
-          font-family: Arial;
-          margin: 40px;
+          background:
+            linear-gradient(
+              rgba(0, 0, 0, 0.6),
+              rgba(0, 0, 0, 0.6)
+            ),
+            url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1950&q=80')
+              no-repeat center center fixed;
+          background-size: cover;
+          font-family: Arial, sans-serif;
+          color: #fff;
+          min-height: 100vh;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          padding: 20px;
         }
-        input, select {
-          margin: 5px;
-          padding: 8px;
-          width: 300px;
+
+        /* Container styling */
+        .container {
+          background: rgba(20, 20, 20, 0.85);
+          border-radius: 15px;
+          padding: 40px 50px;
+          box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);
+          max-width: 600px;
+          width: 100%;
         }
-        button {
-          padding: 10px 20px;
-          margin-top: 10px;
+
+        /* Heading style */
+        h2 {
+          color: #ff6f61; /* Warm travel vibe */
+          font-weight: 700;
+          margin-bottom: 30px;
+          text-align: center;
+          font-size: 2.5rem;
+          user-select: none;
+        }
+
+        /* Form controls */
+        .form-control {
+          background-color: #333;
+          border: 1px solid #555;
+          color: #eee;
+          border-radius: 8px;
+          padding: 12px 15px;
+          font-size: 1rem;
+          transition: 0.3s;
+        }
+
+        .form-control:focus {
+          background-color: #444;
+          border-color: #ff6f61;
+          box-shadow: 0 0 10px #ff6f61;
+          outline: none;
+          color: white;
+        }
+
+        /* Submit button */
+        .btn-primary {
+          background-color: #ff6f61;
+          border: none;
+          padding: 14px 0;
+          font-weight: 700;
+          font-size: 1.2rem;
+          border-radius: 10px;
+          cursor: pointer;
+          transition: background-color 0.3s ease;
+          width: 100%;
+          user-select: none;
+        }
+
+        .btn-primary:hover {
+          background-color: #ff4e3c;
+        }
+
+        /* Result message */
+        .result {
+          margin-top: 25px;
+          text-align: center;
+          font-weight: 700;
+          font-size: 1.1rem;
+          user-select: none;
         }
     </style>
 </head>
 <body>
+<div class="container">
+    <h2>Destination Diary</h2>
+    <form id="travelForm">
+        <div class="form-group">
+            <label for="travelerName"></label><input
+                    type="text"
+                    class="form-control"
+                    id="travelerName"
+                    placeholder="Traveler Name"
+                    required
+            />
+        </div>
+        <div class="form-group">
+            <label for="source"></label><input
+                    type="text"
+                    class="form-control"
+                    id="source"
+                    placeholder="Source"
+                    required
+            />
+        </div>
+        <div class="form-group">
+            <label for="destination"></label><input
+                    type="text"
+                    class="form-control"
+                    id="destination"
+                    placeholder="Destination"
+                    required
+            />
+        </div>
+        <div class="form-group">
+            <label for="travelDate"></label><input type="date" class="form-control" id="travelDate" required />
+        </div>
+        <div class="form-group">
+            <label for="modeOfTransport"></label><input
+                    type="text"
+                    class="form-control"
+                    id="modeOfTransport"
+                    placeholder="Mode of Transport (e.g. Bus, Flight)"
+                    required
+            />
+        </div>
+        <div class="form-group">
+            <label for="distance"></label><input
+                    type="number"
+                    class="form-control"
+                    id="distance"
+                    placeholder="Distance (km)"
+                    step="0.1"
+                    required
+            />
+        </div>
+        <div class="form-group">
+            <label for="cost"></label><input
+                    type="number"
+                    class="form-control"
+                    id="cost"
+                    placeholder="Cost"
+                    step="0.01"
+                    required
+            />
+        </div>
+        <div class="form-group">
+            <label for="purpose"></label><input
+                    type="text"
+                    class="form-control"
+                    id="purpose"
+                    placeholder="Purpose (e.g. Business)"
+                    required
+            />
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
 
-<h2>Add Travel History</h2>
-<form id="travelForm">
-    <label for="travelerName"></label><input type="text" id="travelerName" placeholder="Traveler Name" required><br>
-    <label for="source"></label><input type="text" id="source" placeholder="Source" required><br>
-    <label for="destination"></label><input type="text" id="destination" placeholder="Destination" required><br>
-    <label for="travelDate"></label><input type="date" id="travelDate" required><br>
-    <label for="modeOfTransport"></label><input type="text" id="modeOfTransport" placeholder="Mode of Transport (e.g. Bus, Flight)" required><br>
-    <label for="distance"></label><input type="number" id="distance" placeholder="Distance (km)" step="0.1" required><br>
-    <label for="cost"></label><input type="number" id="cost" placeholder="Cost" step="0.01" required><br>
-    <label for="purpose"></label><input type="text" id="purpose" placeholder="Purpose (e.g. Business)" required><br>
-    <button type="submit">Submit</button>
-</form>
-
-<p id="result"></p>
+    <p id="result" class="result"></p>
+</div>
 
 <script>
     const form = document.getElementById("travelForm");
     const result = document.getElementById("result");
 
-    form.addEventListener("submit", function(event) {
+    form.addEventListener("submit", function (event) {
       event.preventDefault();
 
       const travelData = {
@@ -50,30 +188,29 @@
         modeOfTransport: document.getElementById("modeOfTransport").value,
         distance: parseFloat(document.getElementById("distance").value),
         cost: parseFloat(document.getElementById("cost").value),
-        purpose: document.getElementById("purpose").value
+        purpose: document.getElementById("purpose").value,
       };
 
-      fetch("http://localhost:8080/api/travels", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(travelData)
-      })
-      .then(response => {
-        if (response.ok) {
-          result.textContent = "Travel history added successfully!";
-          result.style.color = "green";
-          form.reset();
-        } else {
-          result.textContent = "Error adding travel history.";
-          result.style.color = "red";
-        }
-      })
-      .catch(error => {
-        result.textContent = "Network error.";
-        result.style.color = "red";
-      });
+      fetch("http://localhost:8080/api/TravelHistory", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(travelData)
+    })
+        .then((response) => {
+          if (response.ok) {
+            result.textContent = "Travel history added successfully!";
+            result.style.color = "lightgreen";
+            form.reset();
+          } else {
+            result.textContent = "Error adding travel history.";
+            result.style.color = "tomato";
+          }
+        })
+        .catch((error) => {
+          result.textContent = "Network error.";
+          result.style.color = "tomato";
+        });
     });
 </script>
-
 </body>
 </html>
