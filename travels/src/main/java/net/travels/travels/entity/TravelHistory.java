@@ -115,4 +115,9 @@ public class TravelHistory
     public void setUpdatedAt(LocalDate updatedAt) {
         this.updatedAt = updatedAt;
     }
+
+     public Long getId()
+    {
+        return id;
+    }
 }
