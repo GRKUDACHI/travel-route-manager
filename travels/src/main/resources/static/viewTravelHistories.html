@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Travel History List</title>
+    <link
+            rel="stylesheet"
+            href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.21/css/dataTables.bootstrap4.min.css" />
+    <style>
+        /* Background with travel-related image and overlay */
+        body {
+            background-image:
+                url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1950&q=80');
+            background-size: cover; /* Cover the entire viewport */
+            background-position: center; /* Center the image */
+            background-repeat: no-repeat; /* Prevent repeating */
+            position: relative; /* Positioning for overlay */
+            min-height: 100vh; /* Full height */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* Overlay for better text visibility */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6); /* Dark overlay */
+            z-index: 1; /* Place overlay above background */
+        }
+
+        /* Container styling */
+        .container {
+            background: rgba(20, 20, 20, 0.85);
+            border-radius: 15px;
+            padding: 40px 50px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);
+            max-width: 100%;
+            width: 100%;
+            position: relative; /* Ensure container is above overlay */
+            z-index: 2; /* Place container above overlay */
+            overflow-x: auto; /* Allow horizontal scrolling */
+        }
+
+        /* Heading style */
+        h2 {
+            color: #ff6f61; /* Warm travel vibe */
+            font-weight: 700;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 2.5rem;
+            user-select: none;
+        }
+
+        /* Table styling */
+        table {
+            width: 100%; /* Ensure table takes full width */
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #555;
+            color: #fff;
+        }
+
+        th {
+            background-color: #ff6f61; /* Header background color */
+            color: #fff; /* Header text color */
+        }
+
+        tr:nth-child(even) {
+            background-color: rgba(255, 255, 255, 0.1); /* Light background for even rows */
+        }
+
+        tr:hover {
+            background-color: rgba(255, 255, 255, 0.2); /* Highlight on hover */
+        }
+
+        /* Icon styling */
+        .transport-icon {
+            margin-right: 5px; /* Space between icon and text */
+        }
+
+        /* Add button styling */
+        .add-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: #ff6f61;
+            border: none;
+            border-radius: 50%;
+            color: white;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            z-index: 3; /* Ensure it is above the overlay */
+        }
+
+        .add-button:hover {
+            background-color: #ff4e3c;
+        }
+
+        #travelTable tbody tr {
+          background-color: #222 !important; /* uniform dark color */
+        }
+        #travelTable tbody tr:hover {
+          background-color: #333 !important; /* slightly lighter hover color */
+        }
+
+        .button {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            color: white;
+            margin: 0 5px;
+        }
+
+        .update-button {
+            background-color: #007bff; /* Blue */
+        }
+
+        .delete-button {
+            background-color: #dc3545; /* Red */
+        }
+
+        .update-button:hover {
+            background-color: #0056b3; /* Darker blue */
+        }
+
+        .delete-button:hover {
+            background-color: #c82333; /* Darker red */
+        }
+
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Travel History List</h2>
+    <button class="add-button" onclick="window.location.href='index.html'">
+        <i class="fas fa-plus"></i>
+    </button>
+    <table id="travelTable" class="table table-striped table-dark">
+        <thead>
+        <tr>
+            <th>Sl No</th>
+            <th>Name</th>
+            <th>Source</th>
+            <th>Destination</th>
+            <th>Date</th>
+            <th>Transport</th>
+            <th>Distance</th>
+            <th>Cost</th>
+            <th>Purpose</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.js"></script>
+<script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.21/js/dataTables.bootstrap4.min.js"></script>
+
+<script>
+    function loadTravelHistory() {
+        fetch("http://localhost:8080/api/TravelHistory")
+            .then(res => res.json())
+            .then(data => {
+                const tbody = document.querySelector("#travelTable tbody");
+                tbody.innerHTML = ""; // clear existing rows
+                let serialNumber = 1;
+                data.forEach(item => {
+                    // Determine the transport icon
+                    let transportIcon;
+                    switch (item.modeOfTransport.toLowerCase()) {
+                        case 'air transport':
+                        case 'flight':
+                        case 'airplane':
+                            transportIcon = '<i class="ui-icon-plane transport-icon"></i>'; // Cloud icon for air transport
+                            break;
+                        case 'road transport':
+                        case 'car':
+                        case 'bus':
+                        case 'bike':
+                            transportIcon = '<i class="ui-icon-car transport-icon"></i>'; // Road icon
+                            break;
+                        case 'rail transport':
+                        case 'train':
+                            transportIcon = '<i class="ui-icon-train transport-icon"></i>'; // Train icon
+                            break;
+                        case 'boat':
+                        case 'ship':
+                        case 'port':
+                            transportIcon = '<i class="ui-icon-ship transport-icon"></i>'; // Ship icon
+                            break;
+                        default:
+                            transportIcon = '<i class="fas fa-question-circle transport-icon"></i>'; // Default icon (question mark)
+                    }
+
+                    const row = `
+                        <tr>
+                            <td>${serialNumber++}</td>
+                            <td>${item.travelerName}</td>
+                            <td>${item.source}</td>
+                            <td>${item.destination}</td>
+                            <td>${new Date(item.travelDate).toLocaleDateString()}</td>
+                            <td>${transportIcon} ${item.modeOfTransport}</td>
+                            <td>${item.distance}</td>
+                            <td>${item.cost}</td>
+                            <td>${item.purpose}</td>
+                            <td style = "display :flex ">
+                                <!-- From Uiverse.io by vinodjangid07 -->
+                               <button class="Btn" onclick="updateTravel(${item.id})">Edit
+                                  <svg class="svg" viewBox="0 0 512 512">
+                                    <path d="M410.3 231l11.3-11.3-33.9-33.9-62.1-62.1L291.7 89.8l-11.3 11.3-22.6 22.6L58.6 322.9c-10.4 10.4-18 23.3-22.2 37.4L1 480.7c-2.5 8.4-.2 17.5 6.1 23.7s15.3 8.5 23.7 6.1l120.3-35.4c14.1-4.2 27-11.8 37.4-22.2L387.7 253.7 410.3 231zM160 399.4l-9.1 22.7c-4 3.1-8.5 5.4-13.3 6.9L59.4 452l23-78.1c1.4-4.9 3.8-9.4 6.9-13.3l22.7-9.1v32c0 8.8 7.2 16 16 16h32zM362.7 18.7L348.3 33.2 325.7 55.8 314.3 67.1l33.9 33.9 62.1 62.1 33.9 33.9 11.3-11.3 22.6-22.6 14.5-14.5c25-25 25-65.5 0-90.5L453.3 18.7c-25-25-65.5-25-90.5 0zm-47.4 168l-144 144c-6.2 6.2-16.4 6.2-22.6 0s-6.2-16.4 0-22.6l144-144c6.2-6.2 16.4-6.2 22.6 0s6.2 16.4 0 22.6z"></path></svg>
+                                </button>
+
+
+                                <button class="delete-button" onclick="deleteTravel(${item.id})">
+                                  <svg class="delete-svgIcon" viewBox="0 0 448 512">
+                                                    <path d="M135.2 17.7L128 32H32C14.3 32 0 46.3 0 64S14.3 96 32 96H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H320l-7.2-14.3C307.4 6.8 296.3 0 284.2 0H163.8c-12.1 0-23.2 6.8-28.6 17.7zM416 128H32L53.2 467c1.6 25.3 22.6 45 47.9 45H346.9c25.3 0 46.3-19.7 47.9-45L416 128z"></path>
+                                                  </svg>
+                                </button>
+
+
+                            </td>
+                        </tr>`;
+                    tbody.innerHTML += row;
+                });
+
+                // Initialize DataTable
+                $('#travelTable').DataTable();
+            })
+            .catch(error => console.error("Error loading data:", error));
+    }
+
+    function deleteTravel(id) {
+        fetch(`http://localhost:8080/api/TravelHistory/id/${id}`, {
+            method: 'DELETE'
+        })
+        .then(response => {
+            if (response.ok) {
+                loadTravelHistory(); // Reload the table after deletion
+            } else {
+                console.error("Failed to delete travel record");
+            }
+        })
+        .catch(error => console.error("Error deleting travel record:", error));
+    }
+
+    function updateTravel(id) {
+        // Redirect to update page or open a modal for updating
+        window.location.href = `update.html?id=${id}`;
+    }
+
+    // Call this function when page loads
+    window.onload = function() {
+        loadTravelHistory();
+    }
+</script>
+</body>
+<style>
+    label {
+        display: inline-block;
+        margin-bottom: .5rem;
+        color: #fff !important;
+    }
+    .dataTables_info {
+        color: #fff !important;
+    }
+    .paginate_button page-item next {
+        color: #ff6f61 !important;
+    }
+    .pagination {
+        color: #ff6f61 !important;
+    }
+    /* From Uiverse.io by vinodjangid07 */
+.button {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: rgb(20, 20, 20);
+  border: none;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.164);
+  cursor: pointer;
+  transition-duration: .3s;
+  overflow: hidden;
+  position: relative;
+}
+
+.svgIcon {
+  width: 12px;
+  transition-duration: .3s;
+}
+
+.svgIcon path {
+  fill: white;
+}
+
+.button:hover {
+  width: 100px;
+  border-radius: 10px;
+  transition-duration: .3s;
+  background-color: rgb(255, 69, 69);
+  align-items: center;
+}
+
+.button:hover .svgIcon {
+  width: 50px;
+  transition-duration: .3s;
+  transform: translateY(60%);
+}
+
+.button::before {
+  position: absolute;
+  top: -10px;
+  content: "Delete";
+  color: white;
+  transition-duration: .3s;
+  font-size: 2px;
+}
+
+.button1::before {
+  position: absolute;
+  top: -10px;
+  content: "Edit";
+  color: white;
+  transition-duration: .3s;
+  font-size: 2px;
+}
+
+.button:hover::before {
+  font-size: 13px;
+  opacity: 1;
+  transform: translateY(30px);
+  transition-duration: .3s;
+}
+
+    /* From Uiverse.io by vinodjangid07 */
+.Btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100px;
+  height: 40px;
+  border: none;
+  padding: 0px 20px;
+  background-color:rgb(255, 69, 69);
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 10px;
+  box-shadow: black;
+  transition-duration: .3s;
+}
+
+.svg {
+  width: 13px;
+  position: absolute;
+  right: 0;
+  margin-right: 20px;
+  fill: white;
+  transition-duration: .3s;
+}
+
+.Btn:hover {
+  color: transparent;
+}
+
+.Btn:hover svg {
+  right: 43%;
+  margin: 0;
+  padding: 0;
+  border: none;
+  transition-duration: .3s;
+}
+
+.Btn:active {
+  transform: translate(3px , 3px);
+  transition-duration: .3s;
+  box-shadow: 2px 2px 0px rgb(140, 32, 212);
+}
+
+/* From Uiverse.io by aaronross1 */
+.delete-button {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: rgb(20, 20, 20);
+  border: none;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.164);
+  cursor: pointer;
+  transition-duration: 0.3s;
+  overflow: hidden;
+  position: relative;
+}
+
+.delete-svgIcon {
+  width: 15px;
+  transition-duration: 0.3s;
+}
+
+.delete-svgIcon path {
+  fill: white;
+}
+
+.delete-button:hover {
+  width: 90px;
+   border-radius: 10px;
+  transition-duration: 0.3s;
+  background-color: rgb(255, 69, 69);
+  align-items: center;
+}
+
+.delete-button:hover .delete-svgIcon {
+  width: 20px;
+  transition-duration: 0.3s;
+  transform: translateY(60%);
+  -webkit-transform: rotate(360deg);
+  -moz-transform: rotate(360deg);
+  -o-transform: rotate(360deg);
+  -ms-transform: rotate(360deg);
+  transform: rotate(360deg);
+}
+
+.delete-button::before {
+  display: none;
+  content: "Delete";
+  color: white;
+  transition-duration: 0.3s;
+  font-size: 2px;
+}
+
+.delete-button:hover::before {
+  display: block;
+  padding-right: 10px;
+  font-size: 13px;
+  opacity: 1;
+  transform: translateY(0px);
+  transition-duration: 0.3s;
+}
+</style>
+</html>
